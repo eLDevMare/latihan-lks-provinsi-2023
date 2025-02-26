@@ -42,7 +42,7 @@ class ValidationController extends Controller
                      "validations.reason_accepted as reason_accepted",
                      "validations.validator_notes as validator_notes",
                      "validators.name as validator")
-            ->first();
+            ->get();
     
         return response()->json([
             "validation" => $data
