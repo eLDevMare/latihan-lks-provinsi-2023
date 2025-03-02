@@ -38,7 +38,7 @@ class Wall extends Plant {
     constructor(image,x,y,width,height){
         super(image,x,y,width,height)
         this.sunConsum = 50
-        this.healt = 2800
+        this.healt = 500
     }
 }
 
@@ -155,7 +155,7 @@ class Zombie {
         this.y = y
         this.width = width
         this.height = height
-        this.speed = 0.3
+        this.speed = 5
         this.healt = 6
     }
 
@@ -198,7 +198,7 @@ class Shooter {
 class PeaShooter extends Shooter {
     constructor(image,x,y,width,height,access){
         super(image,x,y,width,height,access)
-        this.damage = 1
+        this.damage = 6 / 5
     }
 }
 
@@ -206,7 +206,7 @@ class PeaShooter extends Shooter {
 class IceShooter extends Shooter {
     constructor(image,x,y,width,height,access){
         super(image,x,y,width,height,access)
-        this.damage = 1
+        this.damage = 6 / 7
         this.slow = 0.1
         this.duration = 1.5 * 1000  
     }
@@ -215,7 +215,7 @@ class IceShooter extends Shooter {
 class SunFactory extends Shooter {
     constructor(image,x,y,width,height){
         super(image,x,y,width,height)
-        this.duration = 8 * 1000
+        this.duration = 10 * 1000
     }
 
 
@@ -236,7 +236,7 @@ class SunFactory extends Shooter {
 
 
 class Gameboard {
-    constructor(board,boardHeight,boardWidth,ctx,pea, ice, wall, flower, sun, sunTotal,peaArray,iceArray,wallArray,flowerArray,sunArray, zombie, zombieArray, pointer,seedFlower,seedIce,seedPea,seedWall, select, shovel,dart, dartArray, pointArray, machine, machineArray, peaGun, peaGunArray, iceGun, iceGunArray, sunFactory, sunFactoryArray, dashboardHtml, instructionHtml, usernameInput, boardHtml,score,time){
+    constructor(board,boardHeight,boardWidth,ctx,pea, ice, wall, flower, sun, sunTotal,peaArray,iceArray,wallArray,flowerArray,sunArray, zombie, zombieArray, pointer,seedFlower,seedIce,seedPea,seedWall, select, shovel,dart, dartArray, pointArray, machine, machineArray, peaGun, peaGunArray, iceGun, iceGunArray, sunFactory, sunFactoryArray, dashboardHtml, instructionHtml, usernameInput, boardHtml,score,time, difficulty, pause, pauseHtml, gameOver, outputHtml,usernameOutput, scoreOutput, timeOutput, dataHtml){
         this.board = board
         this.boardHeight = boardHeight
         this.boardWidth = boardWidth
@@ -278,12 +278,21 @@ class Gameboard {
         this.boardHtml = boardHtml
         this.score = score
         this.time = time
+        this.difficulty = difficulty
+        this.pause = pause
+        this.pauseHtml = pauseHtml
+        this.gameOver = gameOver
+        this.outputHtml = outputHtml
+        this.usernameOutput = usernameOutput
+        this.scoreOutput = scoreOutput
+        this.timeOutput = timeOutput
+        this.dataHtml = dataHtml
     }
     
     initialize(){
         requestAnimationFrame(this.update.bind(this))
-        setInterval(this.setSun.bind(this), 10000)
-        setInterval(this.setZombie.bind(this), 10000) 
+        setInterval(this.setSun.bind(this), 3000)
+        setInterval(this.difficultyFunc.bind(this), 5000) 
         setInterval(this.defaultSigma.bind(this), 50)
         setInterval(this.setPeaShooter.bind(this), 1500)
         setInterval(this.setIceShooter.bind(this), 1500)
@@ -297,7 +306,14 @@ class Gameboard {
     listener(){
         document.addEventListener("mousemove", (e) => this.movePointer(e))
         document.addEventListener("click", () => this.mouseClick())
+        document.addEventListener("keydown", (e) => this.pauseEsc(e))
     }   
+
+    pauseEsc(e){
+        if(e.code == "Escape"){
+            this.pause = true
+        }
+    }
 
     defaultSigma (){
         this.pointer.defaultDetect()
@@ -318,10 +334,28 @@ class Gameboard {
         this.sunArray.push(sun)
     }
 
-    setZombie(){
+    setZombieEasy(){
         let zombie = new Zombie(this.zombie.image, this.zombie.x, this.zombie.y, this.zombie.width, this.zombie.height)
         zombie.randomPlace()
         this.zombieArray.push(zombie)
+    }
+
+    setZombieMedium(){
+        for(let a = 0; a < 2; a++){
+            let zombie = new Zombie(this.zombie.image, this.zombie.x, this.zombie.y, this.zombie.width, this.zombie.height)
+            zombie.randomPlace()
+            console.log("zombie")
+            this.zombieArray.push(zombie)
+        }
+    }
+
+    setZombieHard(){
+        for(let a = 0; a < 3; a++){
+            console.log("set")
+            let zombie = new Zombie(this.zombie.image, this.zombie.x, this.zombie.y, this.zombie.width, this.zombie.height)
+            zombie.randomPlace()
+            this.zombieArray.push(zombie)
+        }
     }
 
     setDart(){
@@ -381,6 +415,15 @@ class Gameboard {
     }
 
     update(){
+        if(this.pause == true){
+            this.pauseHtml.style.display = "flex"
+            return
+        }
+        if(this.gameOver == true){
+            this.outputHtml.style.display = "flex"
+            this.outputFunc()
+            return
+        }
         requestAnimationFrame(this.update.bind(this))
         this.ctx.clearRect(0,0,this.boardWidth,this.boardHeight)
 
@@ -409,11 +452,11 @@ class Gameboard {
         this.ctx.font = "25px arial"
         this.ctx.fillText(this.usernameInput, 690,55)
         this.ctx.fillText(`Score : ${this.score}`, 690,90)
-        this.ctx.fillText(`Time : ${this.time}`, 690,125)
+        this.ctx.fillText(`Time : ${this.time += 1}`, 690,125)
         
-        console.log(this.usernameInput)
         this.shovel.draw(this.ctx)
         this.pointer.draw(this.ctx)
+        this.getData()
     }
 
     loopDart(){
@@ -435,7 +478,8 @@ class Gameboard {
 
             for(let h = 0; h <  this.zombieArray.length; h++){
                 let zombie = this.zombieArray[h]
-                if(zombie.healt == 0){
+                if(zombie.healt <= 0){
+                    this.score += 20
                     this.zombieArray.splice(h, 1)
                     h--
                 }
@@ -457,7 +501,8 @@ class Gameboard {
         
             for(let h = 0; h <  this.zombieArray.length; h++){
                 let zombie = this.zombieArray[h]
-                if(zombie.healt == 0){
+                if(zombie.healt <= 0){
+                    this.score += 20
                     this.zombieArray.splice(h, 1)
                     h--
                 }
@@ -478,6 +523,9 @@ class Gameboard {
             let zombie = this.zombieArray[j]
             zombie.draw(this.ctx)
             zombie.x -= zombie.speed
+            if(zombie.x < -50){
+                this.gameOver = true
+            }
         }
     }
 
@@ -714,6 +762,65 @@ class Gameboard {
         gameboard.initialize()
     }
 
+
+    difficultyFunc(){
+        this.difficulty = document.getElementById("difficulty").value
+        if(this.difficulty == "easy"){
+            this.setZombieEasy()
+        }
+        if(this.difficulty == "medium"){
+            this.setZombieMedium()
+        }
+        if(this.difficulty == "hard"){
+            this.setZombieHard()
+            console.log("yes")
+            console.log(this.zombieArray)
+        }
+    }
+
+    resumeFunc(){
+        this.pause = false
+        this.pauseHtml.style.display = "none"
+        requestAnimationFrame(this.update())
+    }
+
+
+    outputFunc(){
+        this.usernameOutput =  document.getElementById("output-name").value  = this.usernameInput
+        this.scoreOutput =  document.getElementById("output-score").value = `Sccore : ${this.score}`
+        this.timeOutput =  document.getElementById("output-time").value = `Time : ${this.time}`
+    }
+
+    setData(){
+        console.log("save")
+        let data = {
+            username: this.usernameInput,
+            score: this.score
+        }
+        let dataAll = JSON.parse(localStorage.getItem("data")) || []
+
+        dataAll.push(data)
+        localStorage.setItem("data",JSON.stringify(dataAll))
+        
+        window.location.reload()
+    }
+
+
+    getData(){
+        let html = this.dataHtml
+        let data = JSON.parse(localStorage.getItem("data")) || []
+
+        html.innerHTML = data?.map((item) => 
+        `
+            <div>
+                <p>${item.username}</p>
+                <p>Score : ${item.score}</p>
+            </div>
+        `
+        ).join("");
+    }
+
+    
 }
 
 
@@ -729,8 +836,17 @@ board.width = boardWidth
 let dashboardHtml  = document.getElementById("background")
 let boardHtml  = document.getElementById("board-leaderboard")
 let instructionHtml = document.getElementById("instruction")
+let pauseHtml = document.getElementById("pause")
+let outputHtml = document.getElementById("output")
+let dataHtml = document.getElementById("data-html")
 
 let usernameInput;
+let difficulty;
+
+let usernameOutput;
+let scoreOutput;
+let timeOutput;
+
 // OG 
 let peaImage = new Image()
 peaImage.src = "assets/PeaShooter/frame_05_delay-0.12s.gif"
@@ -806,6 +922,8 @@ let select;
 let sunTotal =  50
 let score = 0
 let time = 0
+let pause = false;
+let gameOver = false
 
 let pea = new Pea(peaImage,plantX,plantY,plantWidth,plantHeight)
 let ice = new Ice(iceImage,plantX,plantY,plantWidth,plantHeight)
@@ -828,4 +946,4 @@ let iceGun = new IceShooter(iceGunImage, 0, 0, 40,40)
 let sunFactory = new SunFactory(sunImage, 0,0,50,50)
 
 
-let gameboard = new Gameboard(board,boardHeight, boardWidth, ctx, pea, ice, wall, flower, sun, sunTotal,peaArray,iceArray,wallArray,flowerArray,sunArray, zombie, zombieArray, pointer, seedFlower,seedIce,seedPea,seedWall, select, shovel,dart, dartArray, pointArray, machine, machineArray, peaGun, peaGunArray,iceGun, iceGunArray, sunFactory, sunFactoryArray, dashboardHtml, instructionHtml,usernameInput, boardHtml, score, time)
+let gameboard = new Gameboard(board,boardHeight, boardWidth, ctx, pea, ice, wall, flower, sun, sunTotal,peaArray,iceArray,wallArray,flowerArray,sunArray, zombie, zombieArray, pointer, seedFlower,seedIce,seedPea,seedWall, select, shovel,dart, dartArray, pointArray, machine, machineArray, peaGun, peaGunArray,iceGun, iceGunArray, sunFactory, sunFactoryArray, dashboardHtml, instructionHtml,usernameInput, boardHtml, score, time, difficulty, pause, pauseHtml, gameOver, outputHtml, usernameOutput,scoreOutput,timeOutput, dataHtml)

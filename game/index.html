@@ -168,6 +168,81 @@
             background: url("assets/General/Background.jpg");
             background-size: contain;
         }
+
+        .pause {
+            background-color: brown;
+            display: none;
+            flex-direction: column;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%,-50%);
+            z-index: 5;
+            padding: 2rem 2rem 2rem 2rem;
+            border-radius: 10px;
+        }
+
+        .pause img {
+            height: 8rem;
+        }
+
+        .pause div {
+            margin-top: 2rem;
+        }
+
+        .pause div button {
+            font-size: 1.2rem;
+            border-radius: 5px;
+            height: 2rem;
+            width: 8rem;
+            cursor: pointer;
+        }
+
+
+        .output {
+            background-color: brown;
+            display: none;
+            flex-direction: column;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%,-50%);
+            z-index: 5;
+            padding: 2rem 2rem 2rem 2rem;
+            border-radius: 10px;
+        }
+
+        .output img {
+            height: 8rem;
+        }
+
+        .output div:nth-of-type(1){
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .output div:nth-of-type(1) input {
+            height: 2.5rem;
+            width: 20rem;
+            border-radius: 10px;
+            border: rgb(240, 78, 78) 5px solid;
+            background-color: rgb(128, 32, 32);
+            color: white;
+            padding-left: 1rem;
+        }
+
+        .output div {
+            margin-top: 2rem;
+        }
+
+        .output div button {
+            font-size: 1.2rem;
+            border-radius: 5px;
+            height: 2rem;
+            width: 8rem;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -177,11 +252,11 @@
                 <img src="assets/General/logo.png" alt="">
                 <form onsubmit="event.preventDefault(); gameboard.startGame()">
                     <div>
-                        <input type="text" name="" id="username-input" placeholder="Input Username" >
-                        <select name="" id="">
-                            <option value="">Easy</option>
-                            <option value="">Medium</option>
-                            <option value="">Hard</option>
+                        <input type="text" name="" id="username-input" placeholder="Input Username" required>
+                        <select name="" id="difficulty">
+                            <option value="easy">Easy</option>
+                            <option value="medium">Medium</option>
+                            <option value="hard">Hard</option>
                         </select>
                     </div>
                     <div>
@@ -211,16 +286,30 @@
                 <option value="">Sort By Name</option>
                 <option value="">Sort By Score</option>
             </select>
-            <div>   
-                <div>
-                    <p>Thomas</p>
-                    <p>Score : 50</p>
-                </div>
-                <div>
-                    <p>Thomas</p>
-                    <p>Score : 50</p>
-                </div>
+            <div id="data-html">   
+                
             </div>
+        </div>
+    </div>
+
+    <div class="pause" id="pause">
+        <img src="assets/General/logo.png" alt="">
+        <div>
+            <button onclick="gameboard.resumeFunc()">Resume</button>
+            <button onclick="window.location.reload()">exit</button>
+        </div>
+    </div>
+
+    <div class="output" id="output">
+        <img src="assets/General/logo.png" alt="">
+        <div>
+            <input type="text" name="" id="output-name" value="">
+            <input type="text" name="" id="output-score" value="">
+            <input type="text" name="" id="output-time" value="">
+        </div>
+        <div>
+            <button onclick="gameboard.setData()">Save</button>
+            <button onclick="window.location.reload()">exit</button>
         </div>
     </div>
     <script src="script.js"></script>
